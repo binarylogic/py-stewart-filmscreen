@@ -74,3 +74,31 @@ async def test_client_sends_commands_and_updates_state() -> None:
     assert any(m.name == "POSITION" for m in seen)
 
     await client.stop_client()
+
+
+@pytest.mark.asyncio
+async def test_client_emits_connection_callbacks() -> None:
+    transport = FakeTransport()
+    client = StewartFilmscreenClient(
+        host="127.0.0.1",
+        username="u",
+        password="p",
+        transport=transport,  # type: ignore[arg-type]
+        command_throttle_seconds=0.0,
+    )
+
+    events: list[str] = []
+    client.register_connection_callback(events.append)
+
+    await client.start()
+    await client.wait_authenticated(timeout=1)
+    await asyncio.sleep(0)
+
+    assert events == ["connected"]
+
+    await transport.close()
+    await asyncio.sleep(0.05)
+
+    assert events == ["connected", "disconnected"]
+
+    await client.stop_client()

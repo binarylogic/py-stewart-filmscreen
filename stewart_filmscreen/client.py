@@ -8,6 +8,7 @@ import inspect
 import logging
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
+from typing import Literal
 
 from .const import (
     COMMAND_DOWN,
@@ -28,6 +29,8 @@ from .transport import StewartTelnetTransport
 log = logging.getLogger(__name__)
 
 StateCallback = Callable[[ProtocolMessage], Awaitable[None] | None]
+ConnectionEvent = Literal["connected", "disconnected"]
+ConnectionCallback = Callable[[ConnectionEvent], Awaitable[None] | None]
 
 
 @dataclass
@@ -70,6 +73,7 @@ class StewartFilmscreenClient:
 
         self.state = RuntimeState()
         self._callbacks: list[StateCallback] = []
+        self._connection_callbacks: list[ConnectionCallback] = []
 
     @property
     def connected(self) -> bool:
@@ -82,6 +86,14 @@ class StewartFilmscreenClient:
     def deregister_callback(self, callback: StateCallback) -> None:
         if callback in self._callbacks:
             self._callbacks.remove(callback)
+
+    def register_connection_callback(self, callback: ConnectionCallback) -> None:
+        if callback not in self._connection_callbacks:
+            self._connection_callbacks.append(callback)
+
+    def deregister_connection_callback(self, callback: ConnectionCallback) -> None:
+        if callback in self._connection_callbacks:
+            self._connection_callbacks.remove(callback)
 
     async def start(self) -> None:
         if self._running:
@@ -109,6 +121,7 @@ class StewartFilmscreenClient:
             try:
                 await self._transport.connect()
                 self._authenticated.set()
+                await self._emit_connection("connected")
                 self._read_task = asyncio.create_task(self._read_loop())
             except Exception as err:  # noqa: BLE001
                 self._authenticated.clear()
@@ -127,6 +140,7 @@ class StewartFilmscreenClient:
             log.debug("Read loop stopped: %s", err)
         finally:
             self._authenticated.clear()
+            await self._emit_connection("disconnected")
 
     async def _command_loop(self) -> None:
         while self._running:
@@ -155,6 +169,15 @@ class StewartFilmscreenClient:
                     await out
             except Exception:  # noqa: BLE001
                 log.exception("state callback failed")
+
+    async def _emit_connection(self, event: ConnectionEvent) -> None:
+        for cb in tuple(self._connection_callbacks):
+            try:
+                out = cb(event)
+                if inspect.isawaitable(out):
+                    await out
+            except Exception:  # noqa: BLE001
+                log.exception("connection callback failed")
 
     async def send_raw(self, line: str) -> None:
         await self._command_queue.put(line)
