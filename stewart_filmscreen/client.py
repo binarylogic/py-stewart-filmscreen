@@ -19,7 +19,10 @@ from .const import (
     DEFAULT_COMMAND_THROTTLE_SECONDS,
     DEFAULT_PORT,
     DEFAULT_RECONNECT_SECONDS,
+    MAX_PRESET_NUMBER,
+    MIN_PRESET_NUMBER,
     MOTOR_ALL,
+    QUERY_POSITION,
 )
 from .exceptions import ConnectionFailedError
 from .models import ProtocolMessage
@@ -186,7 +189,7 @@ class StewartFilmscreenClient:
         await self.send_raw(build_command(motor, command, value=value))
 
     async def query_position(self, motor: str) -> None:
-        await self.send_raw(build_query(motor, "POSITION"))
+        await self.send_raw(build_query(motor, QUERY_POSITION))
 
     async def move_up(self, motor: str) -> None:
         await self.send_command(motor, COMMAND_UP)
@@ -198,7 +201,16 @@ class StewartFilmscreenClient:
         await self.send_command(motor, COMMAND_STOP)
 
     async def recall_preset(self, preset_number: int) -> None:
+        self._validate_preset_number(preset_number)
         await self.send_command(MOTOR_ALL, COMMAND_RECALL, value=preset_number)
 
     async def store_preset(self, preset_number: int) -> None:
+        self._validate_preset_number(preset_number)
         await self.send_command(MOTOR_ALL, COMMAND_STORE, value=preset_number)
+
+    def _validate_preset_number(self, preset_number: int) -> None:
+        if MIN_PRESET_NUMBER <= preset_number <= MAX_PRESET_NUMBER:
+            return
+        raise ValueError(
+            f"preset_number must be between {MIN_PRESET_NUMBER} and {MAX_PRESET_NUMBER}"
+        )

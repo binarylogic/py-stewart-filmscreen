@@ -59,7 +59,7 @@ async def real_client() -> AsyncGenerator[StewartFilmscreenClient, None]:
         username=username,
         password=password,
         reconnect_seconds=2.0,
-        command_throttle_seconds=0.1,
+        command_throttle_seconds=1.0,
     )
 
     await client.start()

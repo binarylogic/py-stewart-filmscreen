@@ -102,3 +102,21 @@ async def test_client_emits_connection_callbacks() -> None:
     assert events == ["connected", "disconnected"]
 
     await client.stop_client()
+
+
+@pytest.mark.asyncio
+async def test_client_rejects_invalid_preset_numbers() -> None:
+    transport = FakeTransport()
+    client = StewartFilmscreenClient(
+        host="127.0.0.1",
+        username="u",
+        password="p",
+        transport=transport,  # type: ignore[arg-type]
+        command_throttle_seconds=0.0,
+    )
+
+    with pytest.raises(ValueError, match="preset_number must be between 1 and 32"):
+        await client.recall_preset(0)
+
+    with pytest.raises(ValueError, match="preset_number must be between 1 and 32"):
+        await client.store_preset(33)

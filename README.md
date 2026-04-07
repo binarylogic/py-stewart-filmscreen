@@ -9,6 +9,10 @@ This is a clean implementation focused on reliability, explicit typing, and dete
 Protocol reference used:
 - https://www.stewartfilmscreen.com/Files/files/Support%20Material/Controls/CVM.pdf
 
+Design boundary:
+- This library owns protocol parsing, transport behavior, reconnect behavior, and safe command pacing.
+- Integrations built on top of it should focus on product-specific entity mapping and UX, not duplicate queueing or protocol safety rules.
+
 ## Installation
 
 ```bash
@@ -43,6 +47,10 @@ async def main() -> None:
 
 asyncio.run(main())
 ```
+
+By default, commands are paced with a conservative `1.0s` inter-command delay because some CVM controllers become unreliable when requests are sent too rapidly. Override `command_throttle_seconds` only if you have verified your controller tolerates a lower value.
+
+Preset commands are validated against the documented CVM slot range of `1-32`.
 
 ## Development
 
