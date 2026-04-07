@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/binarylogic/py-stewart-filmscreen/compare/v0.1.1...v0.1.2) (2026-04-07)
+
+
+### Bug Fixes
+
+* simplify cvm client safety behavior ([7438c03](https://github.com/binarylogic/py-stewart-filmscreen/commit/7438c03b77fde054a4c30f2d24de323ca796e16c))
+
 ## [0.1.1](https://github.com/binarylogic/py-stewart-filmscreen/compare/v0.1.0...v0.1.1) (2026-03-10)
 
 
