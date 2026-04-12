@@ -50,7 +50,7 @@ asyncio.run(main())
 
 By default, commands are paced with a conservative `1.0s` inter-command delay because some CVM controllers become unreliable when requests are sent too rapidly. Override `command_throttle_seconds` only if you have verified your controller tolerates a lower value.
 
-Preset commands are validated against the documented CVM slot range of `1-32`.
+Preset commands are validated against the documented CVM slot range of `1-24`.
 
 ## Development
 

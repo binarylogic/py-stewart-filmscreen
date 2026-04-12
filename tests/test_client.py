@@ -115,8 +115,8 @@ async def test_client_rejects_invalid_preset_numbers() -> None:
         command_throttle_seconds=0.0,
     )
 
-    with pytest.raises(ValueError, match="preset_number must be between 1 and 32"):
+    with pytest.raises(ValueError, match="preset_number must be between 1 and 24"):
         await client.recall_preset(0)
 
-    with pytest.raises(ValueError, match="preset_number must be between 1 and 32"):
-        await client.store_preset(33)
+    with pytest.raises(ValueError, match="preset_number must be between 1 and 24"):
+        await client.store_preset(25)

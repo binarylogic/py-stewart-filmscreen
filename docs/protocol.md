@@ -15,7 +15,7 @@ Supported protocol surface:
 Behavioral rules in this library:
 - Commands are serialized through a single queue.
 - Commands are paced conservatively by default with a `1.0s` inter-command delay.
-- Preset numbers are validated as `1-32`.
+- Preset numbers are validated as `1-24`.
 - Reconnect and callback behavior are deterministic and owned by the client layer.
 
 Non-goals:
